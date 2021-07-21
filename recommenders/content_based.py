@@ -35,8 +35,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 
 # Importing data
-movies = pd.read_csv('resources/data/movies.csv', sep = ',',delimiter=',')
+movies = pd.read_csv('resources/data/movies.csv', sep = ',')
 ratings = pd.read_csv('resources/data/ratings.csv')
+# Refer to the 'Content Based (genres, directors, plot_keywords)' notebook to see how it this dataframe was generated
+df_movies = pd.read_csv('resources/data/movies_summary.csv')
+
 movies.dropna(inplace=True)
 
 def data_preprocessing(subset_size):
@@ -54,9 +57,9 @@ def data_preprocessing(subset_size):
 
     """
     # Split genre data into individual words.
-    movies['keyWords'] = movies['genres'].str.replace('|', ' ')
+    #movies['keyWords'] = movies['genres'].str.replace('|', ' ')
     # Subset of the data
-    movies_subset = movies[:subset_size]
+    movies_subset = df_movies[:subset_size]
     return movies_subset
 
 # !! DO NOT CHANGE THIS FUNCTION SIGNATURE !!
@@ -83,7 +86,7 @@ def content_model(movie_list,top_n=10):
     data = data_preprocessing(27000)
     # Instantiating and generating the count matrix
     count_vec = CountVectorizer()
-    count_matrix = count_vec.fit_transform(data['keyWords'])
+    count_matrix = count_vec.fit_transform(data['summary'])
     indices = pd.Series(data['title'])
     cosine_sim = cosine_similarity(count_matrix, count_matrix)
     # Getting the index of the movie that matches the title
@@ -108,5 +111,5 @@ def content_model(movie_list,top_n=10):
     # Removing chosen movies
     top_indexes = np.setdiff1d(top_50_indexes,[idx_1,idx_2,idx_3])
     for i in top_indexes[:top_n]:
-        recommended_movies.append(list(movies['title'])[i])
+        recommended_movies.append(list(df_movies['title'])[i])
     return recommended_movies
